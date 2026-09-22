@@ -1,0 +1,19 @@
+{
+ "doctype": "DocType",
+ "name": "Loan Approval Step",
+ "module": "Loan Assignment",
+ "custom": 0,
+ "istable": 1,
+ "issingle": 0,
+ "is_submittable": 0,
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "fields": [
+  {"fieldname": "sequence", "fieldtype": "Int", "label": "Sequence", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "approver_role", "fieldtype": "Link", "label": "Approver Role", "options": "Role", "in_list_view": 1},
+  {"fieldname": "approver_user", "fieldtype": "Link", "label": "Approver User", "options": "User", "in_list_view": 1},
+  {"fieldname": "delegate_user", "fieldtype": "Link", "label": "Delegate User", "options": "User", "in_list_view": 1,
+   "description": "Acts when the approver is on approved leave on the day of action"}
+ ],
+ "permissions": []
+}

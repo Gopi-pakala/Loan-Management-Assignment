@@ -1,0 +1,21 @@
+{
+ "doctype": "DocType",
+ "name": "Loan Recovery Detail",
+ "module": "Loan Assignment",
+ "custom": 0,
+ "istable": 1,
+ "issingle": 0,
+ "is_submittable": 0,
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "fields": [
+  {"fieldname": "loan", "fieldtype": "Link", "label": "Loan", "options": "Loan", "in_list_view": 1, "read_only": 1},
+  {"fieldname": "schedule_period", "fieldtype": "Int", "label": "Schedule Period", "in_list_view": 1, "read_only": 1},
+  {"fieldname": "principal_amount", "fieldtype": "Currency", "label": "Principal", "in_list_view": 1, "read_only": 1},
+  {"fieldname": "interest_amount", "fieldtype": "Currency", "label": "Interest", "in_list_view": 1, "read_only": 1},
+  {"fieldname": "arrears_amount", "fieldtype": "Currency", "label": "Arrears", "in_list_view": 1, "read_only": 1},
+  {"fieldname": "shortfall_amount", "fieldtype": "Currency", "label": "Shortfall", "read_only": 1},
+  {"fieldname": "total_recovered", "fieldtype": "Currency", "label": "Total Recovered", "in_list_view": 1, "read_only": 1}
+ ],
+ "permissions": []
+}

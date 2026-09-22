@@ -1,0 +1,28 @@
+{
+ "doctype": "DocType",
+ "name": "Loan Interest Accrual",
+ "module": "Loan Assignment",
+ "custom": 0,
+ "istable": 0,
+ "issingle": 0,
+ "is_submittable": 1,
+ "track_changes": 1,
+ "autoname": "hash",
+ "naming_rule": "Random",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "engine": "InnoDB",
+ "fields": [
+  {"fieldname": "loan", "fieldtype": "Link", "label": "Loan", "options": "Loan", "reqd": 1, "in_standard_filter": 1},
+  {"fieldname": "period_start", "fieldtype": "Date", "label": "Period Start", "reqd": 1},
+  {"fieldname": "period_end", "fieldtype": "Date", "label": "Period End", "reqd": 1},
+  {"fieldname": "interest_amount", "fieldtype": "Currency", "label": "Interest Amount", "reqd": 1, "read_only": 1},
+  {"fieldname": "journal_entry", "fieldtype": "Link", "label": "Journal Entry", "options": "Journal Entry", "read_only": 1},
+  {"fieldname": "amended_from", "fieldtype": "Link", "label": "Amended From", "options": "Loan Interest Accrual", "read_only": 1, "no_copy": 1, "print_hide": 1}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "cancel": 1, "amend": 1, "print": 1, "report": 1, "export": 1},
+  {"role": "Finance Manager", "read": 1, "print": 1, "report": 1, "export": 1},
+  {"role": "CFO", "read": 1, "print": 1, "report": 1, "export": 1}
+ ]
+}

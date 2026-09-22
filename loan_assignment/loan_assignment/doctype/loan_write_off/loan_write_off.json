@@ -1,0 +1,35 @@
+{
+ "doctype": "DocType",
+ "name": "Loan Write Off",
+ "module": "Loan Assignment",
+ "custom": 0,
+ "istable": 0,
+ "issingle": 0,
+ "is_submittable": 1,
+ "track_changes": 1,
+ "autoname": "hash",
+ "naming_rule": "Random",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "engine": "InnoDB",
+ "fields": [
+  {"fieldname": "loan", "fieldtype": "Link", "label": "Loan", "options": "Loan", "reqd": 1, "in_standard_filter": 1},
+  {"fieldname": "employee", "fieldtype": "Link", "label": "Employee", "options": "Employee", "fetch_from": "loan.employee", "read_only": 1},
+  {"fieldname": "write_off_date", "fieldtype": "Date", "label": "Write-off Date", "reqd": 1},
+  {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+  {"fieldname": "recovered_from_settlement", "fieldtype": "Currency", "label": "Recovered From Settlement"},
+  {"fieldname": "section_break_amounts", "fieldtype": "Section Break", "label": "Amounts"},
+  {"fieldname": "principal_written_off", "fieldtype": "Currency", "label": "Principal Written Off", "read_only": 1},
+  {"fieldname": "interest_written_off", "fieldtype": "Currency", "label": "Interest Written Off", "read_only": 1},
+  {"fieldname": "reason", "fieldtype": "Small Text", "label": "Reason", "reqd": 1},
+  {"fieldname": "section_break_state", "fieldtype": "Section Break", "label": "State"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Draft\nPending Finance\nPending CFO\nWritten Off\nRejected", "default": "Draft", "read_only": 1, "in_list_view": 1},
+  {"fieldname": "journal_entry", "fieldtype": "Link", "label": "Journal Entry", "options": "Journal Entry", "read_only": 1},
+  {"fieldname": "amended_from", "fieldtype": "Link", "label": "Amended From", "options": "Loan Write Off", "read_only": 1, "no_copy": 1, "print_hide": 1}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "cancel": 1, "amend": 1, "print": 1, "report": 1, "export": 1},
+  {"role": "Finance Manager", "read": 1, "write": 1, "create": 1, "print": 1, "report": 1, "export": 1},
+  {"role": "CFO", "read": 1, "write": 1, "submit": 1, "print": 1, "report": 1, "export": 1}
+ ]
+}

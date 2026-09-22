@@ -1,0 +1,42 @@
+{
+ "doctype": "DocType",
+ "name": "Loan Type",
+ "module": "Loan Assignment",
+ "custom": 0,
+ "istable": 0,
+ "issingle": 0,
+ "is_submittable": 0,
+ "quick_entry": 1,
+ "track_changes": 1,
+ "autoname": "field:loan_type_name",
+ "naming_rule": "By fieldname",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "engine": "InnoDB",
+ "fields": [
+  {"fieldname": "loan_type_name", "fieldtype": "Data", "label": "Loan Type Name", "reqd": 1, "unique": 1},
+  {"fieldname": "company", "fieldtype": "Link", "label": "Company", "options": "Company", "reqd": 1},
+  {"fieldname": "column_break_3", "fieldtype": "Column Break"},
+  {"fieldname": "interest_mode", "fieldtype": "Select", "label": "Interest Mode", "options": "Flat\nReducing Balance", "reqd": 1},
+  {"fieldname": "rate_of_interest", "fieldtype": "Percent", "label": "Rate of Interest (Annual)"},
+  {"fieldname": "section_break_eligibility", "fieldtype": "Section Break", "label": "Eligibility"},
+  {"fieldname": "max_tenure_months", "fieldtype": "Int", "label": "Max Tenure (Months)", "reqd": 1},
+  {"fieldname": "max_multiple_of_gross", "fieldtype": "Float", "label": "Max Multiple of Gross", "precision": "2", "reqd": 1},
+  {"fieldname": "column_break_9", "fieldtype": "Column Break"},
+  {"fieldname": "min_service_months", "fieldtype": "Int", "label": "Min Service (Months)"},
+  {"fieldname": "max_active_loans", "fieldtype": "Int", "label": "Max Active Loans", "default": "1"},
+  {"fieldname": "section_break_accounts", "fieldtype": "Section Break", "label": "Accounting"},
+  {"fieldname": "pre_closure_charge_percent", "fieldtype": "Percent", "label": "Pre-closure Charge %"},
+  {"fieldname": "column_break_14", "fieldtype": "Column Break"},
+  {"fieldname": "loan_account", "fieldtype": "Link", "label": "Loan Account (Receivable)", "options": "Account", "reqd": 1},
+  {"fieldname": "interest_account", "fieldtype": "Link", "label": "Interest Account (Income)", "options": "Account", "reqd": 1},
+  {"fieldname": "writeoff_account", "fieldtype": "Link", "label": "Write-off Account (Expense)", "options": "Account", "reqd": 1},
+  {"fieldname": "disabled", "fieldtype": "Check", "label": "Disabled"}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "report": 1, "export": 1},
+  {"role": "HR Manager", "read": 1, "write": 1, "create": 1, "print": 1, "report": 1, "export": 1},
+  {"role": "Finance Manager", "read": 1, "write": 1, "create": 1, "print": 1, "report": 1, "export": 1},
+  {"role": "Employee", "read": 1}
+ ]
+}

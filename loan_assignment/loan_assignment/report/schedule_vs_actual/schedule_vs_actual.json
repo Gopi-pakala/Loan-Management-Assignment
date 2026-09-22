@@ -1,0 +1,15 @@
+{
+ "doctype": "Report",
+ "name": "Schedule vs Actual",
+ "report_name": "Schedule vs Actual",
+ "module": "Loan Assignment",
+ "ref_doctype": "Loan Repayment Schedule",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "roles": [
+  {"role": "System Manager"},
+  {"role": "HR Manager"},
+  {"role": "Finance Manager"},
+  {"role": "CFO"}
+ ]
+}

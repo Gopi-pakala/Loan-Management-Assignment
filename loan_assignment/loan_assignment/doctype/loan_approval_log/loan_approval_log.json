@@ -1,0 +1,22 @@
+{
+ "doctype": "DocType",
+ "name": "Loan Approval Log",
+ "module": "Loan Assignment",
+ "custom": 0,
+ "istable": 1,
+ "issingle": 0,
+ "is_submittable": 0,
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "fields": [
+  {"fieldname": "step", "fieldtype": "Int", "label": "Step", "in_list_view": 1, "read_only": 1},
+  {"fieldname": "approver", "fieldtype": "Link", "label": "Approver", "options": "User", "in_list_view": 1, "read_only": 1},
+  {"fieldname": "acted_for", "fieldtype": "Link", "label": "Acted For (if delegate)", "options": "User", "read_only": 1},
+  {"fieldname": "action", "fieldtype": "Select", "label": "Action", "options": "Approved\nRejected\nReturned", "in_list_view": 1, "read_only": 1},
+  {"fieldname": "from_status", "fieldtype": "Data", "label": "From Status", "read_only": 1},
+  {"fieldname": "to_status", "fieldtype": "Data", "label": "To Status", "read_only": 1},
+  {"fieldname": "comment", "fieldtype": "Small Text", "label": "Comment", "read_only": 1},
+  {"fieldname": "acted_on", "fieldtype": "Datetime", "label": "Acted On", "in_list_view": 1, "read_only": 1}
+ ],
+ "permissions": []
+}
