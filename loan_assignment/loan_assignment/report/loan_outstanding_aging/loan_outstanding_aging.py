@@ -52,19 +52,26 @@ def get_data(filters):
 	if scope:
 		conditions.append(f"({scope})")
 
+	# A correlated subquery here (one `Loan Repayment Schedule` scan per
+	# `Loan` row) turns into O(loans x schedule rows) — fine at demo scale,
+	# not at 2,000 loans. Pre-aggregating the oldest due date per loan into
+	# its own grouped subquery, then joining it once, keeps this to a
+	# single pass over each table.
 	rows = frappe.db.sql(f"""
 		select
 			l.name as loan, l.employee, e.employee_name, e.department, l.loan_type,
 			l.sanctioned_amount, l.disbursed_amount, l.principal_recovered, l.interest_recovered,
 			l.outstanding_principal, l.outstanding_interest, l.arrears_amount, l.status,
-			(
-				select min(due_date) from `tabLoan Repayment Schedule` s
-				where s.loan = l.name and s.is_current = 1
-					and s.due_date <= %(as_on_date)s
-					and s.status in ('Pending', 'Partially Recovered')
-			) as oldest_due_date
+			oldest.oldest_due_date
 		from `tabLoan` l
 		join `tabEmployee` e on e.name = l.employee
+		left join (
+			select loan, min(due_date) as oldest_due_date
+			from `tabLoan Repayment Schedule`
+			where is_current = 1 and due_date <= %(as_on_date)s
+				and status in ('Pending', 'Partially Recovered')
+			group by loan
+		) oldest on oldest.loan = l.name
 		where {" and ".join(conditions)}
 		order by l.arrears_amount desc, l.name
 	""", values, as_dict=True)
@@ -90,7 +97,42 @@ def bucket(oldest_due_date, as_on_date):
 
 
 def get_summary(filters, data):
-	computed_total = sum(flt(r.outstanding_principal) + flt(r.outstanding_interest) for r in data)
+	# The control-account tie must cover every loan that can have money
+	# against the receivable account — not just the rows the aging list
+	# chooses to display. `get_data()` filters listed rows to
+	# `first_deduction_month <= as_on_date` (this list is about repayment
+	# having started); a loan can be disbursed, and so already sitting on
+	# the receivable account, before its first deduction is due. Reusing
+	# `data` here previously under-counted the computed side against
+	# exactly that population, producing a false "break" — so this queries
+	# the full outstanding total independently, scoped the same way the GL
+	# side is (company/date only), not by the list's display filter.
+	conditions = ["l.docstatus = 1"]
+	values = {"as_on_date": filters.as_on_date or nowdate()}
+	joins = ""
+	if filters.company:
+		conditions.append("l.company = %(company)s")
+		values["company"] = filters.company
+	if filters.loan_type:
+		conditions.append("l.loan_type = %(loan_type)s")
+		values["loan_type"] = filters.loan_type
+	if filters.department:
+		joins = "join `tabEmployee` e on e.name = l.employee"
+		conditions.append("e.department = %(department)s")
+		values["department"] = filters.department
+
+	scope = employee_scope_condition("Loan", "employee", frappe.session.user)
+	if scope == "1=0":
+		computed_total = 0
+	else:
+		if scope:
+			conditions.append(f"({scope})")
+		result = frappe.db.sql(
+			f"""select sum(l.outstanding_principal) + sum(l.outstanding_interest)
+				from `tabLoan` l {joins} where {" and ".join(conditions)}""",
+			values,
+		)
+		computed_total = flt(result[0][0]) if result and result[0][0] else 0
 
 	gl_balance = 0
 	if filters.company:

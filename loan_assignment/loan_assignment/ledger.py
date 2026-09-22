@@ -67,8 +67,24 @@ def cancel_payment_entry(payment_entry):
 			pe.cancel()
 
 
-def create_repayment_payment_entry(repayment, loan):
-	"""Dr Bank / Cr Employee Loan Receivable — money received from the employee."""
+def cancel_journal_entry(journal_entry):
+	if not journal_entry:
+		return
+	je = frappe.get_doc("Journal Entry", journal_entry)
+	if je.docstatus == 1:
+		je.flags.ignore_permissions = True
+		with _elevated():
+			je.cancel()
+
+
+def create_repayment_payment_entry(repayment, loan, amount=None):
+	"""Dr Bank / Cr Employee Loan Receivable — money received from the
+	employee. `amount` defaults to the full repayment amount; a foreclosure
+	passes the principal+interest portion only, since its pre-closure
+	charge is a separate fee posted via its own Journal Entry, not part of
+	the receivable.
+	"""
+	amount = flt(amount) if amount is not None else flt(repayment.amount)
 	pe = frappe.new_doc("Payment Entry")
 	pe.update({
 		"payment_type": "Receive",
@@ -78,8 +94,8 @@ def create_repayment_payment_entry(repayment, loan):
 		"party": repayment.employee,
 		"paid_from": loan.loan_account,
 		"paid_to": get_bank_gl_account(repayment.bank_account) if repayment.get("bank_account") else _default_bank_account(loan.company),
-		"paid_amount": flt(repayment.amount),
-		"received_amount": flt(repayment.amount),
+		"paid_amount": amount,
+		"received_amount": amount,
 		"reference_no": repayment.reference_no or repayment.name,
 		"reference_date": repayment.repayment_date,
 		"mode_of_payment": repayment.mode_of_payment,
@@ -90,6 +106,34 @@ def create_repayment_payment_entry(repayment, loan):
 		pe.insert()
 		pe.submit()
 	return pe.name
+
+
+def create_foreclosure_charge_journal_entry(repayment, loan):
+	"""Dr Bank / Cr Interest Income — the pre-closure charge is booked as
+	fee income, separately from the principal/interest collected against
+	the receivable (that part already rides the repayment Payment Entry),
+	since it was never part of the receivable balance to begin with.
+	"""
+	je = frappe.new_doc("Journal Entry")
+	je.update({
+		"voucher_type": "Journal Entry",
+		"company": loan.company,
+		"posting_date": repayment.repayment_date,
+		"user_remark": f"Pre-closure charge on foreclosure of {loan.name} via {repayment.name}",
+		# No party on either leg: the bank account is Bank-type and
+		# interest_account is Income-type — only a Receivable/Payable-type
+		# account can carry a party in ERPNext's GL Entry.
+		"accounts": [
+			{"account": get_bank_gl_account(repayment.bank_account) if repayment.get("bank_account") else _default_bank_account(loan.company),
+				"debit_in_account_currency": repayment.allocated_charge},
+			{"account": loan.interest_account, "credit_in_account_currency": repayment.allocated_charge},
+		],
+	})
+	je.flags.ignore_permissions = True
+	with _elevated():
+		je.insert()
+		je.submit()
+	return je.name
 
 
 def _default_bank_account(company):
@@ -112,11 +156,11 @@ def create_writeoff_journal_entry(write_off, loan):
 		"posting_date": write_off.write_off_date,
 		"user_remark": f"Write-off of loan {loan.name} per {write_off.name}",
 		"accounts": [
+			# No party on the writeoff_account leg: Expense-type accounts can't
+			# carry a party, only Receivable/Payable can (loan_account, below).
 			{
 				"account": loan.writeoff_account,
 				"debit_in_account_currency": amount,
-				"party_type": "Employee",
-				"party": write_off.employee,
 			},
 			{
 				"account": loan.loan_account,

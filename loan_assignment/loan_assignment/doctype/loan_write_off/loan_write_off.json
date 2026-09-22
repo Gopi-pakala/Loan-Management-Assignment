@@ -13,7 +13,7 @@
  "sort_order": "DESC",
  "engine": "InnoDB",
  "fields": [
-  {"fieldname": "loan", "fieldtype": "Link", "label": "Loan", "options": "Loan", "reqd": 1, "in_standard_filter": 1},
+  {"fieldname": "loan", "fieldtype": "Link", "label": "Loan", "options": "Loan", "reqd": 1, "in_standard_filter": 1, "search_index": 1},
   {"fieldname": "employee", "fieldtype": "Link", "label": "Employee", "options": "Employee", "fetch_from": "loan.employee", "read_only": 1},
   {"fieldname": "write_off_date", "fieldtype": "Date", "label": "Write-off Date", "reqd": 1},
   {"fieldname": "column_break_1", "fieldtype": "Column Break"},

@@ -6,6 +6,12 @@
  "ref_doctype": "Loan",
  "report_type": "Script Report",
  "is_standard": "Yes",
+ "filters": [
+  {"fieldname": "company", "label": "Company", "fieldtype": "Link", "options": "Company"},
+  {"fieldname": "department", "label": "Department", "fieldtype": "Link", "options": "Department"},
+  {"fieldname": "loan_type", "label": "Loan Type", "fieldtype": "Link", "options": "Loan Type"},
+  {"fieldname": "as_on_date", "label": "As On Date", "fieldtype": "Date", "default": "Today"}
+ ],
  "roles": [
   {"role": "System Manager"},
   {"role": "Reporting Manager"},

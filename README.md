@@ -48,9 +48,10 @@ bench --site <site-name> run-tests --app loan_assignment
 ```
 
 `test_schedule_math.py` is pure logic (no DB, no fixtures) and covers both interest modes
-against the brief's own illustrative amortisation table. `doctype/loan/test_loan.py` is an
+against the brief's own illustrative amortisation table. `tests/test_loan_lifecycle.py` is an
 integration test that stands up its own minimal Company/Employee/Loan Type fixtures and
-exercises sanction → disbursement → the segregation-of-duty rule end to end.
+exercises sanction → disbursement → the segregation-of-duty rule → the payroll deduction
+(split, and full reversal on Salary Slip cancel) end to end.
 
 ## Module layout
 

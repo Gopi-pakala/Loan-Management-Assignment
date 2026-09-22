@@ -13,7 +13,7 @@
  "sort_order": "DESC",
  "engine": "InnoDB",
  "fields": [
-  {"fieldname": "loan", "fieldtype": "Link", "label": "Loan", "options": "Loan", "reqd": 1, "in_standard_filter": 1},
+  {"fieldname": "loan", "fieldtype": "Link", "label": "Loan", "options": "Loan", "reqd": 1, "in_standard_filter": 1, "search_index": 1},
   {"fieldname": "employee", "fieldtype": "Link", "label": "Employee", "options": "Employee", "fetch_from": "loan.employee", "read_only": 1, "in_standard_filter": 1},
   {"fieldname": "repayment_date", "fieldtype": "Date", "label": "Repayment Date", "reqd": 1},
   {"fieldname": "repayment_type", "fieldtype": "Select", "label": "Repayment Type", "options": "Regular\nLump Sum\nArrears Catch-up\nForeclosure", "reqd": 1, "default": "Regular"},
@@ -27,6 +27,9 @@
   {"fieldname": "allocated_principal", "fieldtype": "Currency", "label": "Allocated to Principal", "read_only": 1},
   {"fieldname": "column_break_allocation", "fieldtype": "Column Break"},
   {"fieldname": "allocated_arrears", "fieldtype": "Currency", "label": "Allocated to Arrears", "read_only": 1},
+  {"fieldname": "allocated_charge", "fieldtype": "Currency", "label": "Pre-Closure Charge", "read_only": 1, "depends_on": "eval:doc.repayment_type=='Foreclosure'"},
+  {"fieldname": "rebated_interest", "fieldtype": "Currency", "label": "Interest Rebated (Unaccrued)", "read_only": 1, "depends_on": "eval:doc.repayment_type=='Foreclosure'"},
+  {"fieldname": "charge_journal_entry", "fieldtype": "Link", "label": "Charge Journal Entry", "options": "Journal Entry", "read_only": 1, "depends_on": "eval:doc.repayment_type=='Foreclosure'"},
   {"fieldname": "payment_entry", "fieldtype": "Link", "label": "Payment Entry", "options": "Payment Entry", "read_only": 1},
   {"fieldname": "amended_from", "fieldtype": "Link", "label": "Amended From", "options": "Loan Repayment", "read_only": 1, "no_copy": 1, "print_hide": 1}
  ],

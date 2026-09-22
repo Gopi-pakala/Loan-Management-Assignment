@@ -80,7 +80,14 @@ def recover_against_available_funds(salary_slip, available):
 
 			remaining -= take
 
-			if is_settled and retrospective.has_later_recovered_periods(loan.name, period.period_no):
+			# A correction doesn't need to fully re-settle the period to
+			# invalidate later periods' recognised interest — even a
+			# partial change to how much principal was actually recovered
+			# this period shifts the true balance those later periods
+			# should have been computed against (e.g. a corrected slip
+			# that recovers *less* than before, because it turns out the
+			# employee took unpaid leave that month).
+			if take > 0 and retrospective.has_later_recovered_periods(loan.name, period.period_no):
 				loan_doc = loan_doc or frappe.get_doc("Loan", loan.name)
 				retrospective.apply_catchup_adjustment(loan_doc, period.period_no)
 

@@ -17,8 +17,10 @@ class LoanInterestAccrual(Document):
 			"accounts": [
 				{"account": loan.loan_account, "debit_in_account_currency": self.interest_amount,
 					"party_type": "Employee", "party": loan.employee},
-				{"account": loan.interest_account, "credit_in_account_currency": self.interest_amount,
-					"party_type": "Employee", "party": loan.employee},
+				# No party here: only a Receivable/Payable-type account may carry a
+				# party (frappe.throw in ERPNext's GL Entry.validate_party otherwise) —
+				# interest_account is Income-type, so this leg stays party-less.
+				{"account": loan.interest_account, "credit_in_account_currency": self.interest_amount},
 			],
 		})
 		je.flags.ignore_permissions = True

@@ -15,7 +15,7 @@
  "fields": [
   {"fieldname": "section_break_identity", "fieldtype": "Section Break", "label": "Identity"},
   {"fieldname": "loan_application", "fieldtype": "Link", "label": "Loan Application", "options": "Loan Application", "read_only": 1},
-  {"fieldname": "employee", "fieldtype": "Link", "label": "Employee", "options": "Employee", "reqd": 1, "read_only": 1, "in_standard_filter": 1},
+  {"fieldname": "employee", "fieldtype": "Link", "label": "Employee", "options": "Employee", "reqd": 1, "read_only": 1, "in_standard_filter": 1, "search_index": 1},
   {"fieldname": "employee_name", "fieldtype": "Data", "label": "Employee Name", "fetch_from": "employee.employee_name", "read_only": 1},
   {"fieldname": "column_break_identity", "fieldtype": "Column Break"},
   {"fieldname": "company", "fieldtype": "Link", "label": "Company", "options": "Company", "reqd": 1, "read_only": 1, "in_standard_filter": 1},

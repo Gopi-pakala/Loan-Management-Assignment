@@ -49,15 +49,24 @@ def apply_catchup_adjustment(loan, corrected_period_no):
 	corrected_row = frappe.db.get_value(
 		"Loan Repayment Schedule",
 		{"loan": loan.name, "is_current": 1, "period_no": corrected_period_no},
-		["closing_balance"], as_dict=True,
+		["opening_balance", "recovered_principal"], as_dict=True,
 	)
 	if not corrected_row:
 		return
 
+	# The schedule row's own `closing_balance` column is fixed at
+	# generation time — a *planned* figure that never moves just because a
+	# period was actually recovered for a different amount than planned.
+	# Using it here would always compare the recompute against itself and
+	# find nothing to correct, no matter how far off the real recovery
+	# was. The *true* balance the correction has to recompute from is
+	# opening balance minus what was actually recovered this period.
+	true_closing_balance = flt(corrected_row.opening_balance) - flt(corrected_row.recovered_principal)
+
 	precision = get_precision_for_company(loan.company)
 	compute = compute_flat_schedule if loan.interest_mode == "Flat" else compute_reducing_schedule
 	recomputed = compute(
-		corrected_row.closing_balance, loan.rate_of_interest, len(later_rows),
+		true_closing_balance, loan.rate_of_interest, len(later_rows),
 		frappe.utils.add_months(frappe.utils.nowdate(), 0), precision,
 	)
 
@@ -77,17 +86,17 @@ def apply_catchup_adjustment(loan, corrected_period_no):
 		f"recovered with revised figures after periods {later_rows[0].period_no}-{later_rows[-1].period_no} "
 		f"had already been posted. Net interest adjustment {delta}."
 	)
+	# No party on the interest_account leg: only Receivable/Payable-type
+	# accounts (loan_account, here) can carry a party in ERPNext's GL Entry.
 	if delta > 0:
-		je.append("accounts", {"account": loan.interest_account, "debit_in_account_currency": delta,
-			"party_type": "Employee", "party": loan.employee})
+		je.append("accounts", {"account": loan.interest_account, "debit_in_account_currency": delta})
 		je.append("accounts", {"account": loan.loan_account, "credit_in_account_currency": delta,
 			"party_type": "Employee", "party": loan.employee})
 	else:
 		amount = abs(delta)
 		je.append("accounts", {"account": loan.loan_account, "debit_in_account_currency": amount,
 			"party_type": "Employee", "party": loan.employee})
-		je.append("accounts", {"account": loan.interest_account, "credit_in_account_currency": amount,
-			"party_type": "Employee", "party": loan.employee})
+		je.append("accounts", {"account": loan.interest_account, "credit_in_account_currency": amount})
 
 	je.flags.ignore_permissions = True
 	with _elevated():

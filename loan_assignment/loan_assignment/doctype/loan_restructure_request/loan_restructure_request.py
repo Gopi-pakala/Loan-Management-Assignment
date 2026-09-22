@@ -41,7 +41,21 @@ class LoanRestructureRequest(Document):
 		periods_recovered = frappe.db.count(
 			"Loan Repayment Schedule", {"loan": loan.name, "is_current": 1, "status": "Recovered"}
 		)
-		true_outstanding = flt(loan.disbursed_amount) - flt(loan.principal_recovered)
+
+		# `disbursed_amount - principal_recovered` is the true remaining
+		# principal across the *whole* loan — but any kept period before
+		# `from_period` that's due-and-not-yet-recovered (as opposed to
+		# actually Recovered) is untouched and still separately claims its
+		# own principal_amount. That claim has to come out of what the new
+		# tail re-spreads, or the schedule's principal column stops
+		# summing to the disbursed amount (double-counted).
+		kept_unrecovered_principal = flt(frappe.db.sql(
+			"""select sum(principal_amount) - sum(recovered_principal)
+				from `tabLoan Repayment Schedule`
+				where loan=%s and is_current=1 and period_no<%s""",
+			(loan.name, from_period),
+		)[0][0])
+		true_outstanding = flt(loan.disbursed_amount) - flt(loan.principal_recovered) - kept_unrecovered_principal
 
 		if self.request_type == "Moratorium":
 			tenure_remaining = (loan.tenure_months - periods_recovered) + self.moratorium_months
