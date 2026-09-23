@@ -360,3 +360,21 @@ loan lookup during payroll O(1) instead of a table scan regardless of how many l
 company-wide), but the specific 3-5x figure was an artifact of the test's own construction, not
 a defect in the deduction logic — worth recording since it's exactly the kind of number that
 looks alarming and would be wrong to "fix" without checking why first.
+
+## 9. Naming series audit
+
+Four doctypes — `Loan Interest Accrual`, `Loan Repayment Schedule`, `Loan Restructure Request`,
+`Loan Write Off` — were left on Frappe's default `autoname: hash` (random 10-character names like
+`i5899ot02r`) instead of a readable series, unlike `Loan`/`Loan Application`/`Loan
+Disbursement`/`Loan Repayment`, which all had one from the start. Given a proper series matching
+the existing convention: `LIA-`, `LRS-`, `LRQ-`, `LWO-` respectively (all `.YYYY.-.#####`).
+`Loan Type` and `Loan Approval Rule` were left as-is — they already name themselves by a
+meaningful field (`loan_type_name`, `rule_code`) rather than a counter, which is the right choice
+for config records identified by name (`Personal`, `B1`, …), not transactional ones.
+
+Changing `autoname` only affects documents created from that point forward — it does not
+retroactively rename anything, so the existing hash-named records (e.g. the one real `Loan Write
+Off` already on the demo bench) keep their names permanently. Verified this is genuinely safe by
+inspecting the DB directly before and after `bench migrate` (existing names unchanged) and by
+inserting and immediately deleting a throwaway record to confirm the new series (`LIA-2026-00001`)
+actually takes effect. Full test suite re-run afterward, still passing.
