@@ -1,9 +1,18 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_months, flt, getdate
+from frappe.utils import add_months, flt, getdate, now_datetime
 
 from loan_assignment.loan_assignment.schedule import rebuild_from_period
+
+
+# (state left, state entered) -> (step, action) for the Approval Log
+APPROVAL_STEPS = {
+	("Pending HR", "Pending Finance"): (1, "Approved"),
+	("Pending HR", "Rejected"): (1, "Rejected"),
+	("Pending Finance", "Applied"): (2, "Approved"),
+	("Pending Finance", "Rejected"): (2, "Rejected"),
+}
 
 
 class LoanRestructureRequest(Document):
@@ -15,6 +24,28 @@ class LoanRestructureRequest(Document):
 			frappe.throw(_("Moratorium Months is required for a Moratorium request."))
 		if self.request_type == "Re-tenure" and not self.new_tenure_months:
 			frappe.throw(_("New Tenure is required for a Re-tenure request."))
+
+		self.log_approval_step()
+
+	def log_approval_step(self):
+		"""Record who endorsed / applied / rejected at each workflow step.
+		`status` already holds the target state here; the state being left
+		is read from the DB (same as before_submit below).
+		"""
+		if self.is_new():
+			return
+		previous_status = frappe.db.get_value("Loan Restructure Request", self.name, "status")
+		step = APPROVAL_STEPS.get((previous_status, self.status))
+		if not step:
+			return
+		self.append("approval_log", {
+			"step": step[0],
+			"approver": frappe.session.user,
+			"action": step[1],
+			"from_status": previous_status,
+			"to_status": self.status,
+			"acted_on": now_datetime(),
+		})
 
 	def before_submit(self):
 		# The Workflow's "Apply" transition already sets `status` to
