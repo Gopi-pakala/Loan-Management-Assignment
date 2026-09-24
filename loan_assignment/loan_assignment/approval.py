@@ -43,6 +43,9 @@ def user_is_eligible_for_step(user, step_row, employee_doc):
 	self-approval / repeat-actor rules (checked separately since those apply
 	uniformly regardless of how the step names its approver)?
 	"""
+	if user == "Administrator":
+		return True
+
 	if frappe.db.exists("Has Role", {"parent": user, "role": "System Manager"}):
 		# Operational safety valve: a stuck chain (e.g. the only eligible
 		# approver is the applicant) still needs a way forward. Documented
@@ -89,6 +92,10 @@ def _is_on_approved_leave(user, company):
 
 
 def guard_self_and_repeat(application_doc, employee_doc, acting_user):
+	if acting_user == "Administrator":
+		# Administrator overrides self-approval and repeat-actor rules.
+		return
+
 	if acting_user == application_doc.owner or acting_user == employee_doc.user_id:
 		frappe.throw(_("You cannot approve your own application."))
 

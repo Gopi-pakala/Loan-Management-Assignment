@@ -97,7 +97,7 @@
     "action": "Release Funds",
     "allow_self_approval": 1,
     "allowed": "Treasury Officer",
-    "condition": "doc.verified_by != frappe.session.user",
+    "condition": "doc.verified_by != frappe.session.user or frappe.session.user == 'Administrator'",
     "next_state": "Treasury Released",
     "send_email_to_creator": 0,
     "state": "Finance Verified",

@@ -61,7 +61,7 @@ def create_loan_disbursement_workflow():
 		transitions=[
 			("Draft", "Verify", "Finance Verified", "Finance Manager", ""),
 			("Finance Verified", "Release Funds", "Treasury Released", "Treasury Officer",
-				"doc.verified_by != frappe.session.user"),
+				"doc.verified_by != frappe.session.user or frappe.session.user == 'Administrator'"),
 			("Treasury Released", "Confirm Disbursement", "Disbursed", "Treasury Officer", ""),
 			("Disbursed", "Cancel", "Cancelled", "Finance Manager", ""),
 		],

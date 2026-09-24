@@ -28,7 +28,7 @@ class LoanDisbursement(Document):
 			self.verified_on = now_datetime()
 
 		if self.status == "Treasury Released":
-			if self.verified_by == frappe.session.user:
+			if self.verified_by == frappe.session.user and frappe.session.user != "Administrator":
 				frappe.throw(_("The Treasury Officer releasing funds cannot be the same user who verified this disbursement."))
 			if not self.released_by:
 				self.released_by = frappe.session.user
@@ -42,7 +42,8 @@ class LoanDisbursement(Document):
 		previous_status = frappe.db.get_value("Loan Disbursement", self.name, "status")
 		if previous_status != "Treasury Released":
 			frappe.throw(_("Disbursement must complete Finance verification and Treasury release before it can be submitted."))
-		if self.verified_by and self.released_by and self.verified_by == self.released_by:
+		if (self.verified_by and self.released_by and self.verified_by == self.released_by
+				and frappe.session.user != "Administrator"):
 			frappe.throw(_("Verifier and releaser must be different users."))
 
 		self.tranche_no = frappe.db.count("Loan Disbursement", {"loan": self.loan, "docstatus": 1}) + 1
