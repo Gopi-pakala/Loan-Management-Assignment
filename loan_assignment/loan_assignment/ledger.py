@@ -16,13 +16,24 @@ def _elevated():
 	The reliable way to run a system-initiated posting regardless of the
 	current user's own Payment Entry/Journal Entry access is to actually
 	post it as Administrator, the same way a background job would.
+
+	frappe.set_user() also overwrites session.sid with the username and
+	wipes session.data / form_dict. Those must be put back afterwards, or
+	the response hands the browser sid=<username> as its cookie and the
+	user is silently logged out ("Login to access ... not whitelisted").
 	"""
 	previous_user = frappe.session.user
+	previous_sid = frappe.session.sid
+	previous_data = frappe.session.data
+	previous_form_dict = frappe.local.form_dict
 	frappe.set_user("Administrator")
 	try:
 		yield
 	finally:
 		frappe.set_user(previous_user)
+		frappe.session.sid = previous_sid
+		frappe.session.data = previous_data
+		frappe.local.form_dict = previous_form_dict
 
 
 def get_bank_gl_account(bank_account):
